@@ -111,3 +111,4 @@ lightning:
     benchmark: True
     accumulate_grad_batches: 16
     check_val_every_n_epoch: 8
+    precision: 32
