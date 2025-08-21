@@ -19,7 +19,7 @@ model:
     conditioning_key: hybrid
     monitor: val/loss_simple_ema
     scale_factor: 0.18215
-    use_ema: true
+    use_ema: false
     load_ema: false
 
     scheduler_config: # 10000 warmup steps
@@ -102,12 +102,12 @@ lightning:
     image_logger:
       target: main.ImageLogger
       params:
-        batch_frequency: 2000
+        batch_frequency: 4000
         max_images: 2
         increase_log_steps: False
 
   trainer:
     max_epochs: 2000
     benchmark: True
-    accumulate_grad_batches: 4
-    check_val_every_n_epoch: 4
+    accumulate_grad_batches: 16
+    check_val_every_n_epoch: 8
