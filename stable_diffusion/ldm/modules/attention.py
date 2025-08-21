@@ -10,6 +10,13 @@ from einops import rearrange, repeat
 
 from ldm.modules.diffusionmodules.util import checkpoint
 
+def _ln_fp32(x, ln):
+    y = F.layer_norm(x.float(), ln.normalized_shape,
+                     ln.weight.float() if ln.weight is not None else None,
+                     ln.bias.float()   if ln.bias   is not None else None,
+                     ln.eps)
+    return y.to(x.dtype)
+
 
 def exists(val):
     return val is not None
@@ -223,9 +230,13 @@ class BasicTransformerBlock(nn.Module):
         return checkpoint(self._forward, (x, context), self.parameters(), self.checkpoint)
 
     def _forward(self, x, context=None):
-        x = self.attn1(self.norm1(x)) + x
-        x = self.attn2(self.norm2(x), context=context) + x
-        x = self.ff(self.norm3(x)) + x
+        # x = self.attn1(self.norm1(x)) + x
+        # x = self.attn2(self.norm2(x), context=context) + x
+        # x = self.ff(self.norm3(x)) + x
+        h = x
+        h = self.attn1(_ln_fp32(h, self.norm1)) + h
+        h = self.attn2(_ln_fp32(h, self.norm2), context=context) + h
+        h = self.ff(_ln_fp32(h, self.norm3)) + h
         return x
 
 
